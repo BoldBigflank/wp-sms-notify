@@ -1,9 +1,16 @@
 # Send SMS on WordPress Publish
 ## Introduction
 
+Help your subscribers never miss a post by offering instant SMS notifications.
+
+At the end of this project, you will have a custom WordPress Plugin that does two things:
+1. Your WordPress users will have a "Mobile Phone" field in their profile to sign up for notifications, and 
+2. Your posts will automatically send a notification message to every subscriber who signed up.
+
+If you're in a hurry, you can find the almost-ready code on [GitHub](https://github.com/BoldBigflank/wp-sms-notify), just drop in the latest [Twilio PHP Library](https://www.twilio.com/docs/libraries/php) and update your Twilio variables in `sms-notify.php`
+
 ## Setup
-### Set Up Your Development Environment
-I won't go in to too many details here, but you should already have a [WordPress Installation](http://wordpress.org/download/) running.
+I won't go in to too many details here, but you should already have a [WordPress Blog](http://wordpress.org/download/) running.
 
 In your WordPress directory, go to `wp-content/plugins` and make a directory, I'm going to call it `sms-notify`. Inside that directory, make a file named `sms-notify.php`. In this file we'll start with some plugin metadata. This is what WordPress reads to show in our Plugin Dashboard.
 
@@ -50,8 +57,8 @@ Back at `/wp-admin`, go to the Users tab and click the Add User button.  Create 
 
 ![Save a phone number](/images/wp-user-profile.png "User Profile page")
 
-## Create a Publish Post Action
-
+## If This Action Happens, Then Send an SMS
+### Create an Action Hook
 Next, we'll set up a function to happen during a publish_post [publish_post](https://codex.wordpress.org/Plugin_API/Action_Reference/publish_post) action and use [get_users](https://codex.wordpress.org/Function_Reference/get_users) to iterate over all the subscribers of the blog. This is in preparation for sending a text message to each subscriber with a number attached to their profile.
 
 ```php
@@ -73,7 +80,7 @@ add_action('publish_post', 'post_published_notification', 10, 2);
 
 For each of the blog's Subscribers, it gets the phone number stored using [get_user_meta](https://codex.wordpress.org/Function_Reference/get_user_meta). Finally, gets set up to execute when the 'publish_post' action happens.  Now, to send our SMS.
 
-## Use Twilio to Send an SMS
+### Use Twilio to Send an SMS
 Go to [Twilio's PHP Library](https://www.twilio.com/docs/libraries/php) and install the library. It's recommended to use Composer, but copying the twilio-php-master folder into our sms-notify folder works as well.  Now add references to the library in the top of sms-notify.php (after the metadata).  
 ```php
 require __DIR__ . '/twilio-php-master/Twilio/autoload.php';
@@ -112,11 +119,14 @@ Be sure to update the `$sid`, `$token`, and `$from` variables to your own Accoun
 
 ## Test
 Head back to your WordPress admin page at `/wp-admin` and add a new Post. Write your deepest desires, then hit Publish.  
-![Alt text](/images/sms-notification.png =250x "Perfect")
+![Alt text](/images/sms-notification.png "Perfect")
 
 ## What's Next
+Now that basic functionality is done, you can use this as a springboard for your own ideas. Here's a few ways to build on this project: 
+- Do more number validation, both on the profile page and when sending messages
+- Create a [Twilio Function](https://www.twilio.com/functions) to handle users' responses to their notifications
+- Call a user and read the post body to them
+- Create a Settings page to manage Twilio credentials or message templates
 
-
-```php
-code
-```
+## About the Author
+Alex Swan is both a professional and hobby programmer, making cool stuff since the '90s. When he's not making games at Jackbox Games in Chicago, he's building [hamster fitness trackers](https://www.hackster.io/boldbigflank/hamster-fitness-tracker-95dfd3), [internet connected bubble machines](https://www.hackster.io/boldbigflank/internet-connected-bubble-machine-ff5685) and other fun projects whenever the mood strikes him.  See his other work on [GitHub](https://www.github.com/boldbigflank) and [Twitter](https://www.twitter.com/boldbigflank).
