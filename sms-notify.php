@@ -5,8 +5,7 @@
  */
 /*
 Plugin Name: SMS Notify
-Plugin URI: http://wordpress.org/plugins/sms_notify/
-Description: This has two functions. First, it adds a 'phone' field to users' profiles, along with a 'notifications' check box. Second, it adds a hook to send an SMS to each user when a post is published.
+Description: This has two functions. First, it adds a 'mobile' field to users' profiles, along with a 'notifications' check box. Second, it adds a hook to send an SMS to each user when a post is published.
 Author: Alex Swan
 Version: 1.0
 Author URI: http://bold-it.com/
@@ -24,7 +23,7 @@ use Twilio\Rest\Client;
 // Now to get a user's phone number we use
 // $mobilePhone = get_user_meta('mobile');
 function modify_contact_methods ($profile_fields) {
-    $profile_fields['mobile'] = "Mobile Phone";
+    $profile_fields['mobile'] = "Mobile Phone (12223334444)";
 
     return $profile_fields;
 }
@@ -41,11 +40,13 @@ function post_published_notification ( $ID, $post ) {
     $client = new Client($sid, $token);
 
     $title = $post->post_title;
-    $body = sprintf('New Post: %s', $title);
+    $permalink = get_permalink( $ID );
+    $body = sprintf('New Post: %s %s', $title, $permalink);
 
     $blogusers = get_users( 'blogid=$ID&role=subscriber' );
     foreach ( $blogusers as $user ) {
         $to = get_user_meta($user->ID, 'mobile', true);
+        if ( intval($to) == 0 ) { continue; }
         // Use the client to do fun stuff like send text messages!
         $client->messages->create(
             // the number you'd like to send the message to
