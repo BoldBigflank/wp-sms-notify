@@ -12,4 +12,14 @@ Version: 1.0
 Author URI: http://bold-it.com/
 */
 
+// This will add the Phone field to the user's profile page
+// Now to get a user's phone number we use
+// $mobilePhone = get_user_meta('phone');
+function modify_contact_methods ($profile_fields) {
+    $profile_fields['mobile'] = "Mobile Phone";
+
+    return $profile_fields;
+}
+add_filter('user_contactmethods','modify_contact_methods');
+
 ?>
