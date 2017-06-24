@@ -12,14 +12,54 @@ Version: 1.0
 Author URI: http://bold-it.com/
 */
 
+// Require the bundled autoload file - the path may need to change
+// based on where you downloaded and unzipped the SDK
+require __DIR__ . '/twilio-php-master/Twilio/autoload.php';
+
+// Use the REST API Client to make requests to the Twilio REST API
+use Twilio\Rest\Client;
+
+
 // This will add the Phone field to the user's profile page
 // Now to get a user's phone number we use
-// $mobilePhone = get_user_meta('phone');
+// $mobilePhone = get_user_meta('mobile');
 function modify_contact_methods ($profile_fields) {
     $profile_fields['mobile'] = "Mobile Phone";
 
     return $profile_fields;
 }
 add_filter('user_contactmethods','modify_contact_methods');
+
+// This will be the hook we'll add to the publish event.
+// $userPhones = get_users( '' )
+function post_published_notification ( $ID, $post ) {
+    // Your Account SID and Auth Token from twilio.com/console
+    $sid = 'ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX';
+    $token = 'auth_token_here';
+    // A Twilio phone number you purchased at twilio.com/console
+    $from = "+15555550199";
+    $client = new Client($sid, $token);
+
+    $title = $post->post_title;
+    $body = sprintf('New Post: %s', $title);
+
+    $blogusers = get_users( 'blogid=$ID&role=subscriber' );
+    foreach ( $blogusers as $user ) {
+        $to = get_user_meta($user->ID, 'mobile', true);
+        // Use the client to do fun stuff like send text messages!
+        $client->messages->create(
+            // the number you'd like to send the message to
+            $to,
+            array(
+                'from' => $from,
+                // the body of the text message you'd like to send
+                'body' => $body
+            )
+        );
+    }
+}
+add_action('publish_post', 'post_published_notification', 10, 2);
+
+
 
 ?>
